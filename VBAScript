@@ -1,0 +1,94 @@
+Sub Test()
+
+Dim Spot As Integer
+Dim IniOpen, IniClose, EndOpen, EndClose, GIV, GDV, GVV As Double
+Dim Volume, LR As Long
+Dim GIT, GDT, GVT As String
+
+For Each ws In Worksheets
+
+LR = ws.Cells(Rows.Count, 1).End(xlUp).Row
+Spot = 2
+Total = 0
+Volume = 0
+
+ws.Range("I1").Value = "Ticker"
+ws.Range("J1").Value = "Yearly Change"
+ws.Range("K1").Value = "Percent Change"
+ws.Range("L1").Value = "Total Stock Volume"
+
+IniOpen = ws.Cells(2, 3).Value
+IniClose = ws.Cells(2, 6).Value
+
+For i = 2 To LR
+    If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+        EndOpen = ws.Cells(i, 3).Value
+        EndClose = ws.Cells(i, 6).Value
+        ws.Cells(Spot, 9).Value = ws.Cells(i, 1).Value
+        ws.Cells(Spot, 10).Value = (EndClose - IniOpen)
+        If (EndClose - IniOpen) >= 0 Then
+            ws.Range("J" & Spot).Interior.ColorIndex = 4
+        Else
+            ws.Range("J" & Spot).Interior.ColorIndex = 3
+        End If
+        If IniOpen = 0 Then
+             ws.Cells(Spot, 11).Value = 0
+        Else
+            ws.Cells(Spot, 11).Value = ((EndClose / IniOpen) - 1)
+        End If
+        ws.Cells(Spot, 11).NumberFormat = "0.00%"
+        Volume = Volume + ws.Cells(i, 7).Value
+        ws.Cells(Spot, 12).Value = Volume
+        Spot = Spot + 1
+        Volume = 0
+        IniOpen = ws.Cells(i + 1, 3).Value
+        IniClose = ws.Cells(i + 1, 6).Value
+    Else
+        Volume = Volume + CLng(ws.Cells(i, 7).Value)
+    End If
+
+Next i
+
+LR = ws.Cells(Rows.Count, 9).End(xlUp).Row
+Spot = 2
+
+ws.Range("O1").Value = "Ticker"
+ws.Range("P1").Value = "Value"
+ws.Range("N2").Value = "Greatest % Increase"
+ws.Range("N3").Value = "Greatest % Decrease"
+ws.Range("N4").Value = "Greatest Total Volume"
+
+
+GIV = 0
+GDV = 0
+GVV = 0
+
+For i = 2 To LR
+    If ws.Cells(i, 11).Value > GIV Then
+        GIV = ws.Cells(i, 11).Value
+        GIT = ws.Cells(i, 9).Value
+    End If
+    If ws.Cells(i, 11).Value < GDV Then
+        GDV = ws.Cells(i, 11).Value
+        GDT = ws.Cells(i, 9).Value
+    End If
+    If ws.Cells(i, 12).Value > GVV Then
+        GVV = ws.Cells(i, 12).Value
+        GVT = ws.Cells(i, 9).Value
+    End If
+Next i
+
+ws.Range("O2").Value = GIT
+ws.Range("O3").Value = GDT
+ws.Range("O4").Value = GVT
+ws.Range("P2").Value = GIV
+ws.Range("P3").Value = GDV
+ws.Range("P4").Value = GVV
+ws.Range("P2").NumberFormat = "0.00%"
+ws.Range("P3").NumberFormat = "0.00%"
+
+ws.Columns("I:P").EntireColumn.AutoFit
+
+Next ws
+
+End Sub
